@@ -1,0 +1,11 @@
+type: chart
+configs:
+  - chart: logging-central
+    release: logging-central
+    test: 
+      values:
+    stage: 
+      values:
+prod: 
+  doDeploy: none
+  #doDeploy: versionfile
