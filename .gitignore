@@ -2,4 +2,4 @@
 
 charts/logging-central/charts
 charts/logging-central/requirements.lock
-charts/logging-central/logging-central-0.0.1.tgz
+charts/logging-central/logging-central-*.tgz
