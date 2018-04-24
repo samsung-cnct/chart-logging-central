@@ -8,7 +8,7 @@
 #       
 dependencies:
         #- name: elasticsearch
-        #version: 0.0.2
+        #version: ">=0.1.0-prod,<0.1.1-prod"
         #repository: http://charts.migrations.cnct.io
 - name: curator
   version: ">=0.0.6-prod,<0.0.7-prod"
