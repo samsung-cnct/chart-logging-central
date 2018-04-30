@@ -1,18 +1,11 @@
-#
-# NOTE: until helm issue 3947 is fixed, our chart version numbers are too long to list
-#       to get a full version number for pinning.
-#       e.g. charts.migrations.cnct.io/curator:0.0.6-prod.1+6b9ff26a9f8ee84d0760c68d117cb37677...
-#       (note the dots...)
-#       Using a range for now.
-#       (MLN 4/23/2018)
-#       
+---
 dependencies:
-        #- name: elasticsearch
-        #version: ">=0.1.0-prod,<0.1.1-prod"
-        #repository: http://charts.migrations.cnct.io
+- name: elasticsearch-chart
+  version: ">=0.1.0-prod,<0.1.1-prod"
+  repository: https://charts.migrations.cnct.io
 - name: curator
   version: ">=0.0.6-prod,<0.0.7-prod"
-  repository: http://charts.migrations.cnct.io
+  repository: https://charts.migrations.cnct.io
 - name: kibana
   version: ">=0.1.4-prod,<0.1.5-prod"
-  repository: http://charts.migrations.cnct.io
+  repository: https://charts.migrations.cnct.io

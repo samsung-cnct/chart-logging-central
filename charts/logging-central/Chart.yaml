@@ -1,11 +1,12 @@
 name: logging-central
-version: 0.0.1
+version: 0.1.0
 description: Logging chart for central elasticsearch (+ curator) -> kibana
 keywords:
 - elasticsearch
 - curator
 - kibana
 - kraken
+- logging
 home: https://github.com/samsung-cnct/chart-logging-central
 sources:
 - https://github.com/samsung-cnct/chart-logging-central
