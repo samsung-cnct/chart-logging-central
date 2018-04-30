@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "logging-central.fullname" . }}-test
+  name: {{ template "logging-central.fullname" . }}
   labels:
     app: {{ template "logging-central.name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
