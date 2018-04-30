@@ -36,7 +36,7 @@ spec:
   volumes:
   - name: tests
     configMap:
-      name: {{ template "logging-central.fullname" . }}-test
+      name: {{ template "logging-central.fullname" . }}
   - name: tools
     emptyDir: {}
   restartPolicy: Never
