@@ -4,7 +4,7 @@ metadata:
   name: {{ template "logging-central.fullname" . }}
   labels:
     app: {{ template "logging-central.name" . }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    chart: {{ template "namewithversion" . }}
     heritage: {{ .Release.Service }}
     release: {{ .Release.Name }}
   annotations:
