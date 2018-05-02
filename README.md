@@ -1,5 +1,7 @@
 # chart-logging-central
-Helm Install for Central Logging
 
-This replaces the deprecated chart-logging.
+[![Build Status](https://jenkins.migrations.cnct.io/buildStatus/icon?job=pipeline-central-logging/master)](https://jenkins.migrations.cnct.io/job/pipeline-central-logging/job/master)
+
+`chart-logging-central` (this chart) and `chart-logging-client` implement our
+central logging solution. This replaces the deprecated `chart-logging`.
 
