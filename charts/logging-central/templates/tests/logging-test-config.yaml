@@ -10,9 +10,6 @@ metadata:
 data:
   run.sh: |-
     @test "Testing internal Elasticsearch service" {
-      curl --connect-timeout 5 --retry 1200 --retry-delay 1 --retry-max-time 1200 https://{{ index .Values "elasticsearch-chart" "name" }}.{{ .Release.Namespace }}:{{ index .Values "elasticsearch-chart" "port" }}/_cluster/health
-    }
-
-    @test "Testing internal Kibana UI is accessible" {
-      curl --connect-timeout 5 --retry 300 --retry-delay 1 --retry-max-time 300 https://{{ index .Values "kibana-chart" "name" }}.{{ .Release.Namespace }}:{{ index .Values "kibana-chart" "port" }}
+      run curl --connect-timeout 5 --retry 1200 --retry-delay 1 --retry-max-time 1200 http://{{ index .Values "elasticsearch-chart" "name" }}.{{ .Release.Namespace }}:{{ index .Values "elasticsearch-chart" "port" }}/_cluster/health
+      [ "$status" -eq 0 ]
     }
