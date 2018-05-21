@@ -3,7 +3,11 @@
 elasticsearch-chart:
   name: elasticsearch
   port: 9200
-  
+
+  data_memory_limits: 32Gi
+  data_memory_requests: 32Gi
+  data_Xms_Xmx: 16g
+
 kibana-chart:
   name: kibana
   port: 5601
