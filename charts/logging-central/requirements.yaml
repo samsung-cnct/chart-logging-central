@@ -9,3 +9,6 @@ dependencies:
 - name: kibana
   version: ">=0.1.4-prod,<0.1.5-prod"
   repository: https://charts.migrations.cnct.io
+- name: chart-client-logging
+  version: ">=0.0.9-prod,<0.0.10-prod"
+  repository: https://charts.migrations.cnct.io
