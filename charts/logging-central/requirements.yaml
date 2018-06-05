@@ -1,4 +1,5 @@
 ---
+# remove me
 dependencies:
 - name: elasticsearch-chart
   version: ">=0.1.2-prod,<0.1.3-prod"
