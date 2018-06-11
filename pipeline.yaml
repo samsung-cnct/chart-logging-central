@@ -2,13 +2,13 @@ type: chart
 configs:
   - chart: logging-central
     release: logging-central
-    test: 
+    test:
       values:
-    stage: 
+    stage:
       values:
 helmRepos:
    - name: cnct-migrations
      url: http://charts.migrations.cnct.io
-prod: 
+prod:
   doDeploy: none
   #doDeploy: versionfile
