@@ -4,9 +4,13 @@ elasticsearch-chart:
   name: elasticsearch
   port: 9200
 
-  data_memory_limits: 16Gi
-  data_memory_requests: 16Gi
-  data_Xms_Xmx: 8g
+  # Setting the data_memory_limits to 8Gi from 16 Gi
+  # See CO-289 and CO-302 for why.
+  data_memory_limits: 8Gi
+  data_memory_requests: 8Gi
+  # Java JVM memory limit needs to be half of the
+  # data_memory_request.
+  data_Xms_Xmx: 4g
 
 kibana-chart:
   name: kibana
@@ -20,7 +24,7 @@ curator:
     Delete indices older than 14 days and prefixed with logstash-.
     Ignore the error if the filter does not result in an actionable
     list of indices (ignore_empty_list) and exit cleanly.
-  
+
   filters:
   - filtertype: pattern
     kind: prefix
@@ -36,6 +40,6 @@ curator:
     stats_result: null
     epoch: null
     exclude: False
-  
+
   logging:
     loglevel: INFO
