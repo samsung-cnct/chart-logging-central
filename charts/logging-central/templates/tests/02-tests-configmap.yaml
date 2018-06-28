@@ -1,0 +1,131 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: {{ template "namewithversion" . }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+data:
+  event-test.tpl: |-
+    {
+      "apiVersion": "v1",
+      "count": 1,
+      "involvedObject": {
+        "apiVersion": "v1",
+        "kind": "HelmTest",
+        "namespace": {{- .Release.Namespace | quote }}
+      },
+      "kind": "Event",
+      "message": "*** This is an NORMAL type event triggered by E2E TESTS @ $TIMENOW. ***",
+      "metadata": {
+        "name": "Validate EventRouter Works $TIMENOW"
+      },
+      "reportingComponent": null,
+      "reportingInstance": null,
+      "type": "Normal"
+    }
+
+  run.sh: |
+    RETRY_CNT=12
+    RETRY_DLY=1
+    RETRY_MAX_TIME=60
+    CNCT_TIMEOUT=5
+    KUBEAPI_URL="https://kubernetes.default.svc/api/v1/namespaces/{{ .Release.Namespace }}/events"
+    # THIS NEEDS TO BE FIXED.
+    ES_URL="https://elasticsearch.<es_namespace>:9200/<query>"
+    CACERT_FILE="/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+    TOKEN="$(< /var/run/secrets/kubernetes.io/serviceaccount/token)"
+    TEST_TMPL_DIR="/tests"
+    TEST_TMPL="$TEST_TMPL_DIR/event-test.tpl"
+    TEST_JSON="$TEST_TMPL_DIR/tests.json"
+    TMP_RESP="$BATS_TMPDIR/resp.out"
+
+    # TIMENOW is set in the pod definition
+    cd $TEST_TMPL_DIR
+
+    # test 1
+    @test "Create VALID test JSON from template" {
+      echo
+      echo "====================================="
+      echo "\$TIMENOW is: $TIMENOW"
+
+      # /tests in $TEST_JSON is using the volumeMounts path
+      # from the containers spec
+      sed -r 's/\$TIMENOW/'"$TIMENOW"'/' $TEST_TMPL > $TEST_JSON
+
+      [[ -s $TEST_JSON ]]
+    }
+
+    # test 2
+    @test "Test SEND event to EventRouter Service" {
+      echo
+      echo "====================================="
+      echo "KUBEAPI URL is: $KUBEAPI_URL"
+      echo "TEST_TMPL is: $TEST_TMPL"
+      echo "TEST_JSON is: $TEST_JSON"
+      echo "PWD is: $PWD"
+
+      echo
+      echo "====================================="
+      echo "The INPUT TEMPLATE directory contains:"
+      ls -ltr $TEST_TMPL_DIR
+
+      echo "The INPUT TEMPLATE contains:"
+      cat $TEST_TMPL
+
+      echo
+      echo "====================================="
+      echo "The OUTPUT JSON directory contains:"
+      ls -ltr $TEST_JSON_DIR
+
+      echo
+      echo "The INPUT JSON contains (cat -A):"
+      cat -A $TEST_JSON
+
+      run curl --connect-timeout $CNCT_TIMEOUT       \
+               --verbose                             \
+               --silent                              \
+               --retry $RETRY_CNT                    \
+               --retry-delay $RETRY_DLY              \
+               --retry-max-time  $RETRY_MAX_TIME     \
+               --cacert $CACERT_FILE --header "Authorization: Bearer $TOKEN" \
+               --header "Content-Type: application/json" \
+               --write-out "\n\n{\"status\": \"%{http_code}\"}" \
+               -X POST $KUBEAPI_URL -d @$TEST_JSON
+
+      resp_status=$(echo "$output" | tail -n 1 | jq -r -M '.status' )
+
+      echo
+      echo "STATUS from JSON response was: ${resp_status:=NOT reported; probably because no JSON was returned.}"
+      echo -e "OUTPUT from cURL response was:\n$output"
+
+      [[ $resp_status == 2[02][0-6] ]]
+    }
+
+    # test 3
+    # # FIX ME SEYMORE!!
+    @test "Test VERIFY event to ElasticSearch was RECVd" {
+      curl --connect-timeout $CNCT_TIMEOUT           \
+           --verbose                                 \
+           --silent                                  \
+           --retry $RETRY_CNT                        \
+           --retry-delay $RETRY_DLY                  \
+           --retry-max-time  $RETRY_MAX_TIME         \
+           --cacert $CACERT_FILE                     \
+           --header "Authorization: Bearer $TOKEN"   \
+           --header "Content-Type: application/json" \
+           --write-out "\n\n{\"status\": \"%{http_code}\"}" \
+           $ES_URL >$TMP_RESP
+
+      #run jq --arg match_this "$TIMENOW" -c -M '.items[].message | ' $BATS_TMPDIR/resp.out
+      run grep "$TIMENOW" $TMP_RESP
+
+      echo
+      echo "RESPONSE from GET EVENTS"
+      cat $TMP_RESP
+
+      [[ $output == *$TIMENOW* ]]
+    }
