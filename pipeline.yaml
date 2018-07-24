@@ -11,7 +11,7 @@ deployments:
         - key: elasticsearch-chart.master_memory_requests
           value: 2Gi
         - key: elasticsearch-chart.master_Xms_Xmx
-          value: 1Gi
+          value: 1g
         - key: elasticsearch-chart.data_create_storage_class
           value: true
         - key: elasticsearch-chart.master_create_storage_class
@@ -23,7 +23,7 @@ deployments:
         - key: elasticsearch-chart.data_memory_requests
           value: 2Gi
         - key: elasticsearch-chart.data_Xms_Xmx
-          value: 1Gi
+          value: 1g
         - key: elasticsearch-chart.data_storage_class_value
           value: esdatasc
         - key: elasticsearch-chart.master_storage_class_value
