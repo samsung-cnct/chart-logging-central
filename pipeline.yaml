@@ -1,14 +1,19 @@
 type: chart
-configs:
+deployments:
   - chart: logging-central
     release: logging-central
     test: 
       values:
-    stage: 
-      values:
+        - key: data_create_storage_class
+          value: true
+        - key: master_create_storage_class
+          value: true
+        - key: data_storage_class_value
+          value: esdatasc
+        - key: master_storage_class_value
+          value: esmastersc
 helmRepos:
    - name: cnct-migrations
      url: http://charts.migrations.cnct.io
 prod: 
   doDeploy: none
-  #doDeploy: versionfile
