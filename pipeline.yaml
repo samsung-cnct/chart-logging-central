@@ -1,14 +1,45 @@
 type: chart
-configs:
+deployments:
   - chart: logging-central
     release: logging-central
     test: 
       values:
-    stage: 
-      values:
+        - key: elasticsearch-chart.master_replicas
+          value: 3
+        - key: elasticsearch-chart.master_memory_limits
+          value: 2Gi
+        - key: elasticsearch-chart.master_memory_requests
+          value: 2Gi
+        - key: elasticsearch-chart.master_Xms_Xmx
+          value: 1g
+        - key: elasticsearch-chart.data_create_storage_class
+          value: true
+        - key: elasticsearch-chart.master_create_storage_class
+          value: true
+        - key: elasticsearch-chart.data_replicas
+          value: 3
+        - key: elasticsearch-chart.data_memory_limits
+          value: 2Gi
+        - key: elasticsearch-chart.data_memory_requests
+          value: 2Gi
+        - key: elasticsearch-chart.data_Xms_Xmx
+          value: 1g
+        - key: elasticsearch-chart.data_storage_class_value
+          value: esdatasc
+        - key: elasticsearch-chart.master_storage_class_value
+          value: esmastersc
+        - key: kibana.replicas
+          value: 1
+        - key: kibana.cpu_limit 
+          value: 100m
+        - key: kibana.cpu_requests 
+          value: 100m
+        - key: kibana.mem_limit 
+          value: 512Mi
+        - key: kibana.mem_requests 
+          value: 512Mi
 helmRepos:
    - name: cnct-migrations
      url: http://charts.migrations.cnct.io
 prod: 
   doDeploy: none
-  #doDeploy: versionfile
