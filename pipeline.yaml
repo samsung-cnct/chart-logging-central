@@ -4,6 +4,12 @@ deployments:
     release: logging-central
     test: 
       values:
+        - key: elasticsearch-chart.master_replicas
+          value: 1
+        - key: elasticsearch-chart.master_memory_limits
+          value: 500Mi
+        - key: elasticsearch-chart.master_memory_requests
+          value: 500Mi
         - key: elasticsearch-chart.data_create_storage_class
           value: true
         - key: elasticsearch-chart.master_create_storage_class
