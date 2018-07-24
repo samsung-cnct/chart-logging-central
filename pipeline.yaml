@@ -12,16 +12,16 @@ deployments:
           value: esdatasc
         - key: elasticsearch-chart.master_storage_class_value
           value: esmastersc
-        - key: kibana-chart.replicas
+        - key: kibana.replicas
           value: 1
-        - key: kibana-chart.cpu_limit 
-          value: 50m
-        - key: kibana-chart.cpu_requests 
-          value: 50m
-        - key: kibana-chart.mem_limit 
-          value: 50Mi
-        - key: kibana-chart.mem_requests 
-          value: 50Mi
+        - key: kibana.cpu_limit 
+          value: 100m
+        - key: kibana.cpu_requests 
+          value: 100m
+        - key: kibana.mem_limit 
+          value: 512Mi
+        - key: kibana.mem_requests 
+          value: 512Mi
 helmRepos:
    - name: cnct-migrations
      url: http://charts.migrations.cnct.io
