@@ -5,25 +5,25 @@ deployments:
     test: 
       values:
         - key: elasticsearch-chart.master_replicas
-          value: 1
+          value: 3
         - key: elasticsearch-chart.master_memory_limits
-          value: 1Gi
+          value: 2Gi
         - key: elasticsearch-chart.master_memory_requests
-          value: 1Gi
+          value: 2Gi
         - key: elasticsearch-chart.master_Xms_Xmx
-          value: 750Mi
+          value: 1Gi
         - key: elasticsearch-chart.data_create_storage_class
           value: true
         - key: elasticsearch-chart.master_create_storage_class
           value: true
         - key: elasticsearch-chart.data_replicas
-          value: 1
+          value: 3
         - key: elasticsearch-chart.data_memory_limits
-          value: 1Gi
+          value: 2Gi
         - key: elasticsearch-chart.data_memory_requests
-          value: 1Gi
+          value: 2Gi
         - key: elasticsearch-chart.data_Xms_Xmx
-          value: 750Mi
+          value: 1Gi
         - key: elasticsearch-chart.data_storage_class_value
           value: esdatasc
         - key: elasticsearch-chart.master_storage_class_value
