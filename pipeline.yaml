@@ -10,6 +10,8 @@ deployments:
           value: 500Mi
         - key: elasticsearch-chart.master_memory_requests
           value: 500Mi
+        - key: elasticsearch-chart.master_Xms_Xmx
+          value: 375Mi
         - key: elasticsearch-chart.data_create_storage_class
           value: true
         - key: elasticsearch-chart.master_create_storage_class
@@ -20,6 +22,8 @@ deployments:
           value: 250Mi
         - key: elasticsearch-chart.data_memory_requests
           value: 250Mi
+        - key: elasticsearch-chart.data_Xms_Xmx
+          value: 186Mi
         - key: elasticsearch-chart.data_storage_class_value
           value: esdatasc
         - key: elasticsearch-chart.master_storage_class_value
