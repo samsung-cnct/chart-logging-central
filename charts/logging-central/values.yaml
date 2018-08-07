@@ -8,7 +8,7 @@ elasticsearch-chart:
   data_memory_requests: 16Gi
   data_Xms_Xmx: 8g
 
-kibana-chart:
+kibana:
   name: kibana
   port: 5601
 
