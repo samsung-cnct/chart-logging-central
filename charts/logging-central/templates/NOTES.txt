@@ -8,8 +8,8 @@ Kibana:
 
   To get the external address of the kibana server you can run following:
 
-  export KIBANA_HOST=$(kubectl get svc/{{index .Values "kibana-chart" "name"}} -n {{.Release.Namespace}} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
-  echo http://${KIBANA_HOST}:{{index .Values "kibana-chart" "port"}}
+  export KIBANA_HOST=$(kubectl get svc/{{index .Values "kibana" "name"}} -n {{.Release.Namespace}} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+  echo http://${KIBANA_HOST}:{{index .Values "kibana" "port"}}
 
 Elasticsearch:
 
