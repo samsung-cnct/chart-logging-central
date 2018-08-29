@@ -4,6 +4,8 @@ deployments:
     release: logging-central
     test: 
       values:
+        - key: logging-central.ci_setup
+          value: true
         - key: elasticsearch-chart.master_replicas
           value: 3
         - key: elasticsearch-chart.master_memory_limits

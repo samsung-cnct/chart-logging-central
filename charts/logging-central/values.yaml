@@ -1,16 +1,31 @@
 # Default values.
 
+name: central_logging
+
+central:
+  ci_testing: false
+  test:
+    image: quay.io/samsung_cnct/e2etester:prod
+    account: elastic
+    password: changeme
+
 elasticsearch-chart:
   name: elasticsearch
   port: 9200
 
-  data_memory_limits: 16Gi
-  data_memory_requests: 16Gi
-  data_Xms_Xmx: 8g
+  data_memory_limits: 3Gi
+  data_memory_requests: 3Gi
+  data_Xms_Xmx: 1g
 
 kibana-chart:
   name: kibana
   port: 5601
+
+kibana:
+  cpu_limit: 100m
+  cpu_requests: 100m
+  mem_limit: 512Mi
+  mem_requests: 512Mi
 
 curator:
   name: curator
