@@ -4,7 +4,7 @@ deployments:
     release: logging-central
     test: 
       values:
-        - key: central.ci_setup
+        - key: central.ci_testing
           value: true
         - key: elasticsearch-chart.master_replicas
           value: 3
