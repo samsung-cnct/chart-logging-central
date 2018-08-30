@@ -46,11 +46,37 @@ data:
     TEST_JSON="$TEST_TEMP_DIR/tests.json"
     TMP_RESP="$BATS_TMPDIR/resp.out"
     TIMESTAMP="$(date +%FT%H:%M:%SZ)"
-    ES_URL="http://elasticsearch.{{ .Release.Namespace }}:9200/logstash-*/_search?size=10"
+    ES_URL="http://elasticsearch.{{ .Release.Namespace }}:9200/logstash-*/_cat/health"
+    ES_SEARCH_URL="http://elasticsearch.{{ .Release.Namespace }}:9200/logstash-*/_search?size=10"
     ES_COUNT_URL="http://elasticsearch.{{ .Release.Namespace }}:9200/logstash-*/_count"
 
     # TIMENOW is set in the pod definition
     cd $TEST_TMPL_DIR
+
+    @test "Wait for healthy ES Cluster before full e2e test" {
+        # Initial health status is "RED"
+        clusterHealth="red"
+
+        #  run until either cluster status is green or 10 minute timeout
+        timeout=0
+        until [ "${clusterHealth}" == "green" -o ${timeout} -gt 600 ]; do
+          clusterHealth=$(curl -s --connect-timeout 1 \
+            -u $ES_BASIC_AUTH \
+            --location $ES_URL | \
+              cut -d ' ' -f 4)
+
+          #echo "ES cluster health ${clusterHealth}" >&3
+          # sleep for a 3 sec if failed
+          if [ "${clusterHealth}" != "green" ]; then
+            echo "Will retry, clusterHealth is ${clusterHealth}" >&3
+            timeout=$((${timeout}+3))
+            sleep 3;
+          fi
+        done
+
+        # yellow or green is acceptable..but green is most desired
+        [ "${clusterHealth}" != "red" ]
+    }
 
     # test 1
     @test "Create VALID test JSON from template" {
