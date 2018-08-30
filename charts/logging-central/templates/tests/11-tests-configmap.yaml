@@ -166,7 +166,7 @@ data:
       REC_ROUNT=0
       RESP=0
       ES_QUERY="{ \"query\": { \"bool\" : { \"must\": [ {\"match\":{\"log\": \"e2eTesting\"}},{\"match\":{\"log\": \"$TIMESTAMP\"}} ] }}}"
-      while [[ $ATTEMPTS -lt 3 ]]; do
+      while [[ $ATTEMPTS -lt 5 ]]; do
         curl --connect-timeout $CNCT_TIMEOUT           \
              --user $ES_BASIC_AUTH                     \
              --silent                                  \
