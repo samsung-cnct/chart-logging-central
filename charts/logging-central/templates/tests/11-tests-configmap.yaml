@@ -60,9 +60,7 @@ data:
         #  run until either cluster status is green or 10 minute timeout
         timeout=0
         until [ "${clusterHealth}" == "green" -o ${timeout} -gt 600 ]; do
-          clusterHealth0=$(curl -s --connect-timeout 1 \
-            -u $ES_BASIC_AUTH \
-            --location $ES_URL )
+          clusterHealth0=$(curl -s --connect-timeout 1 -u $ES_BASIC_AUTH $ES_URL )
             
           echo "ClusterHealth return: $clusterHealth0"  >&3
             
