@@ -2,6 +2,8 @@ type: chart
 deployments:
   - chart: logging-central
     release: logging-central
+    timeout: 1200
+    retries: 2
     test: 
       values:
         - key: central.ci_testing
