@@ -160,11 +160,12 @@ data:
     #
     @test "Test VERIFY event to ElasticSearch was RECVd" {
 
+      # retry  100*3=300sec  5 min
       ATTEMPTS=1
       REC_ROUNT=0
       RESP=0
       ES_QUERY="{ \"query\": { \"bool\" : { \"must\": [ {\"match\":{\"log\": \"e2eTesting\"}},{\"match\":{\"log\": \"$TIMESTAMP\"}} ] }}}"
-      while [[ $ATTEMPTS -lt 5 ]]; do
+      while [[ $ATTEMPTS -lt 100  ]]; do
         curl --connect-timeout $CNCT_TIMEOUT           \
              --user $ES_BASIC_AUTH                     \
              --silent                                  \
