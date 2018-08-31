@@ -62,13 +62,14 @@ data:
         until [ "${clusterHealth}" == "green" -o ${timeout} -gt 600 ]; do
           # curl will fail with a status 7 if the ES cluster isn't ready on the API
           #
-          clusterHealth0=$(curl -s --connect-timeout 1 -u $ES_BASIC_AUTH $ES_URL )
+          run curl -s --connect-timeout 1 -u $ES_BASIC_AUTH $ES_URL
+          if [ $status -ne 0 ]; then
+             # informational
+             echo "ES curl error: $status" >&3
+           fi
 
-          if [ 0 -ne $? ]; then
-             echo "CURL ERROR CODE: $?" >&3
-          fi
+          clusterHealth0=$output
 
-            
           echo "ClusterHealth return: $clusterHealth0"  >&3
             
           clusterHealth=$(echo "$clusterHealth0" | cut -d ' ' -f 4)
