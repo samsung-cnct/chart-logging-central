@@ -166,7 +166,7 @@ data:
       RESP=0
       ES_QUERY="{ \"query\": { \"bool\" : { \"must\": [ {\"match\":{\"log\": \"e2eTesting\"}},{\"match\":{\"log\": \"$TIMESTAMP\"}} ] }}}"
       while [[ $ATTEMPTS -lt 100  ]]; do
-        run curl --connect-timeout $CNCT_TIMEOUT           \
+        curl --connect-timeout $CNCT_TIMEOUT           \
              --user $ES_BASIC_AUTH                     \
              --silent                                  \
              --retry $RETRY_CNT                        \
@@ -188,13 +188,13 @@ data:
         echo "----================------" >&3
         REC_COUNT=$(cat $TMP_RESP | jq -r -M ". | select(.count != null) | .count")
         echo "Record Count: $REC_COUNT" >&3
-        if [[ $REC_COUNT == 0 ]]; then
+        if [[ "x$REC_COUNT" != "x" ]]  && [[ $REC_COUNT > 0 ]]; then
+          RESP=1
+          break
+        else
           ((ATTEMPTS++))
           echo "Retry: $ATTEMPTS" >&3
           sleep 3
-        else
-          RESP=1
-          break
         fi
       done
       [[ $RESP == 1  ]]
