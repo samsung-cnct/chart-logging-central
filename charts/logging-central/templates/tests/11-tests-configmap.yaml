@@ -60,7 +60,14 @@ data:
         #  run until either cluster status is green or 10 minute timeout
         timeout=0
         until [ "${clusterHealth}" == "green" -o ${timeout} -gt 600 ]; do
+          # curl will fail with a status 7 if the ES cluster isn't ready on the API
+          #
           clusterHealth0=$(curl -s --connect-timeout 1 -u $ES_BASIC_AUTH $ES_URL )
+
+          if [ 0 -ne $? ]; then
+             echo "CURL ERROR CODE: $?" >&3
+          fi
+
             
           echo "ClusterHealth return: $clusterHealth0"  >&3
             
@@ -127,6 +134,7 @@ data:
       echo "The INPUT JSON contains (cat -A):" >&3
       echo "$(cat -A $TEST_JSON)" >&3
 
+      # NOTE: run is a  bats thing:  command will produces $status and $output
       run curl --connect-timeout $CNCT_TIMEOUT       \
                --silent                              \
                --retry $RETRY_CNT                    \
@@ -176,6 +184,11 @@ data:
              --write-out "\n\n{\"status\": \"%{http_code}\"}" \
              -d "$ES_QUERY"  \
              $ES_COUNT_URL >$TMP_RESP
+
+
+        if [ 0 -ne $? ]; then
+           echo "CURL ERROR CODE: $?" >&3
+        fi
 
         echo "" >&3
         echo "ES_QUERY: $ES_QUERY" >&3
