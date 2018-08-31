@@ -1,11 +1,15 @@
 ---
 dependencies:
 - name: elasticsearch-chart
-  version: ">=0.1.3-prod,<0.1.4-prod"
+  version: ">=0.1.5-prod,<0.1.6-prod"
   repository: https://charts.migrations.cnct.io
 - name: curator
-  version: ">=0.0.6-prod,<0.0.7-prod"
+  version: ">=0.0.7-prod,<0.0.8-prod"
   repository: https://charts.migrations.cnct.io
 - name: kibana
   version: ">=0.1.4-prod,<0.1.5-prod"
   repository: https://charts.migrations.cnct.io
+- name: logging-client
+  version: ">=0.0.9-prod,<0.0.10-prod"
+  repository: https://charts.migrations.cnct.io
+  condition: central.ci_testing

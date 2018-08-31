@@ -1,0 +1,215 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-%s" .Release.Name "centrallogtest" | trunc 63 }}
+data:
+  event-test.tpl: |-
+    {
+      "apiVersion": "v1",
+      "count": 1,
+      "eventTime": null, 
+      "firstTimeStamp": "$TIMESTAMP",
+      "involvedObject": {
+        "apiVersion": "v1",
+        "kind": "HelmTest",
+        "namespace": {{- .Release.Namespace | quote }}
+      },
+      "kind": "Event",
+      "lastTimeStamp": "$TIMESTAMP",
+      "message": "*** This is an NORMAL type event triggered by E2E TESTS @ $TIMESTAMP. ***",
+      "metadata": {
+        "name": "Validate EventRouter Works $TIMESTAMP"
+      },
+      "reason": "e2eTesting",
+      "reportingComponent": "",
+      "reportingInstance": "",
+      "source": {
+         "component": {{ printf "%s-%s" .Release.Name "centrallogtest" | trunc 63 | quote }}
+      },
+      "type": "Normal"
+    }
+
+  run.sh: |
+    RETRY_CNT=12
+    RETRY_DLY=1
+    RETRY_MAX_TIME=60
+    ES_BASIC_AUTH="{{ .Values.central.test.account }}:{{ .Values.central.test.password }}"
+    CNCT_TIMEOUT=5
+    KUBEAPI_URL="https://kubernetes.default.svc/api/v1/namespaces/{{ .Release.Namespace }}/events"
+    CACERT_FILE="/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+    TOKEN="$(< /var/run/secrets/kubernetes.io/serviceaccount/token)"
+    TEST_TMPL_DIR="/tests"
+    TEST_TEMP_DIR="/testfiles"
+    BATS_TMPDIR="/testfiles"
+    TEST_TMPL="$TEST_TMPL_DIR/event-test.tpl"
+    TEST_JSON="$TEST_TEMP_DIR/tests.json"
+    TMP_RESP="$BATS_TMPDIR/resp.out"
+    TIMESTAMP="$(date +%FT%H:%M:%SZ)"
+    ES_URL="http://elasticsearch.{{ .Release.Namespace }}:9200/_cat/health"
+    ES_SEARCH_URL="http://elasticsearch.{{ .Release.Namespace }}:9200/logstash-*/_search?size=10"
+    ES_COUNT_URL="http://elasticsearch.{{ .Release.Namespace }}:9200/logstash-*/_count"
+
+    # TIMENOW is set in the pod definition
+    cd $TEST_TMPL_DIR
+
+    @test "Wait for healthy ES Cluster before full e2e test" {
+        # Initial health status is "RED"
+        clusterHealth="red"
+
+        #  run until either cluster status is green or 10 minute timeout
+        timeout=0
+        until [ "${clusterHealth}" == "green" -o ${timeout} -gt 600 ]; do
+          # curl will fail with a status 7 if the ES cluster isn't ready on the API
+          #
+          run curl -s --connect-timeout 1 -u $ES_BASIC_AUTH $ES_URL
+          if [ $status -ne 0 ]; then
+             # informational
+             echo "ES curl error: $status" >&3
+           fi
+
+          clusterHealth0=$output
+
+          echo "ClusterHealth return: $clusterHealth0"  >&3
+            
+          clusterHealth=$(echo "$clusterHealth0" | cut -d ' ' -f 4)
+
+          #echo "ES cluster health ${clusterHealth}" >&3
+          # sleep for a 3 sec if failed
+          if [ "${clusterHealth}" != "green" ]; then
+            echo "Will retry, clusterHealth is ${clusterHealth}" >&3
+            timeout=$((${timeout}+3))
+            sleep 3;
+          fi
+        done
+
+        # yellow or green is acceptable..but green is most desired
+        [ "${clusterHealth}" == "green" ] || [ "${clusterHealth}" == "yellow" ]
+    }
+
+    # test 1
+    @test "Create VALID test JSON from template" {
+      echo "" >&3
+      echo "=====================================" >&3
+      echo "\$TIMENOW is: $TIMENOW" >&3
+      echo "\$TIMESTAMP is: $TIMESTAMP" >&3
+      echo "" >&3
+      echo "$(cat $TEST_TMPL)" >&3
+      #echo "$(ls -l)" >&3
+      #echo "$(pwd)" >&3
+      #echo "$(df)" >&3
+
+      # /tests in $TEST_JSON is using the volumeMounts path
+      # from the containers spec
+      #sed -r 's/\$TIMENOW/'"$TIMENOW"'/' $TEST_TMPL > $TEST_JSON
+      sed -r 's/\$TIMESTAMP/'"$TIMESTAMP"'/' $TEST_TMPL > $TEST_JSON
+      echo "=====================================" >&3
+      echo "$(cat $TEST_JSON)" >&3
+
+      [[ -s $TEST_JSON ]]
+    }
+
+    # test 2
+    @test "Test SEND event to EventRouter Service" {
+      echo "" >&3
+      echo "=====================================" >&3
+      echo "KUBEAPI URL is: $KUBEAPI_URL" >&3
+      echo "TEST_TMPL is: $TEST_TMPL" >&3
+      echo "TEST_JSON is: $TEST_JSON" >&3
+      echo "PWD is: $PWD" >&3
+
+      echo "" >&3
+      echo "=====================================" >&3
+      echo "The INPUT TEMPLATE directory contains:" >&3
+      echo "$(ls -ltr $TEST_TMPL_DIR)" >&3
+
+      echo "The INPUT TEMPLATE contains:" >&3
+      echo "$(cat $TEST_TMPL)" >&3
+
+      echo "" >&3
+      echo "=====================================" >&3
+      echo "The OUTPUT JSON directory contains:" >&3
+      echo "$(ls -ltr $TEST_TEMP_DIR)" >&3
+
+      echo "" >&3
+      echo "The INPUT JSON contains (cat -A):" >&3
+      echo "$(cat -A $TEST_JSON)" >&3
+
+      # NOTE: run is a  bats thing:  command will produces $status and $output
+      run curl --connect-timeout $CNCT_TIMEOUT       \
+               --silent                              \
+               --retry $RETRY_CNT                    \
+               --retry-delay $RETRY_DLY              \
+               --retry-max-time  $RETRY_MAX_TIME     \
+               --cacert $CACERT_FILE --header "Authorization: Bearer $TOKEN" \
+               --header "Content-Type: application/json" \
+               --write-out "\n\n{\"status\": \"%{http_code}\"}" \
+               -X POST $KUBEAPI_URL -d @$TEST_JSON
+
+               #resp_status=$(echo "$output" | tail -n 1 | jq -r -M '.status' )
+      resp_status=$(echo "$output" | jq -r -M ". | select(.status != null) | .status" )
+
+      echo "" >&3
+      echo "STATUS from JSON response was: ${resp_status:=NOT reported; probably because no JSON was returned.}" >&3
+      echo -e "OUTPUT from cURL response was:\n$output" >&3
+
+      [[ $resp_status == 2[02][0-6] ]]
+    }
+
+    # test 3
+    # 
+    #        --cacert $CACERT_FILE                     \
+    #       --header "Authorization: Bearer $TOKEN"   \
+    #
+    #      use the count api
+    #       -d '{ "query" : { "bool" : { "must": [ { "match":{ "log" : "e2eTesting" }},{"match":{"log":"$TIMESTAMP"}}] }}}' \
+    #       -d '{ "query" : { "bool" : { "must": [ { "match":{ "log" : "e2eTesting" }},{"match":{"log":"$TIMESTAMP"}}] }}}' \
+    #       -d '{ "query" : { "match" : { "log" : "e2eTesting" }}}' \
+    #       -d '{ "query" : { "match_all" : {}}}' \
+    #
+    @test "Test VERIFY event to ElasticSearch was RECVd" {
+
+      # retry  100*3=300sec  5 min
+      ATTEMPTS=1
+      REC_ROUNT=0
+      RESP=0
+      ES_QUERY="{ \"query\": { \"bool\" : { \"must\": [ {\"match\":{\"log\": \"e2eTesting\"}},{\"match\":{\"log\": \"$TIMESTAMP\"}} ] }}}"
+      while [[ $ATTEMPTS -lt 100  ]]; do
+        curl --connect-timeout $CNCT_TIMEOUT           \
+             --user $ES_BASIC_AUTH                     \
+             --silent                                  \
+             --retry $RETRY_CNT                        \
+             --retry-delay $RETRY_DLY                  \
+             --retry-max-time  $RETRY_MAX_TIME         \
+             --header "Content-Type: application/json" \
+             --write-out "\n\n{\"status\": \"%{http_code}\"}" \
+             -d "$ES_QUERY"  \
+             $ES_COUNT_URL >$TMP_RESP
+
+
+        if [ 0 -ne $? ]; then
+           echo "CURL ERROR CODE: $?" >&3
+        fi
+
+        echo "" >&3
+        echo "ES_QUERY: $ES_QUERY" >&3
+        echo "--------------------------" >&3
+        resp_status=$(cat $TMP_RESP | jq -r -M ". | select(.status != null) | .status" )
+        echo "curl status ${resp_status}" >&3
+        echo "--------------------------" >&3
+        echo "RESPONSE from GET EVENTS" >&3
+        echo "$(cat $TMP_RESP)" >&3
+        echo "----================------" >&3
+        REC_COUNT=$(cat $TMP_RESP | jq -r -M ". | select(.count != null) | .count")
+        echo "Record Count: $REC_COUNT" >&3
+        if [[ "x$REC_COUNT" != "x" ]]  && [[ $REC_COUNT > 0 ]]; then
+          RESP=1
+          break
+        else
+          ((ATTEMPTS++))
+          echo "Retry: $ATTEMPTS" >&3
+          sleep 3
+        fi
+      done
+      [[ $RESP == 1  ]]
+    }

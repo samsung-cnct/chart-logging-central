@@ -1,0 +1,66 @@
+---
+#apiVersion: rbac.authorization.k8s.io/v1beta1
+#kind: ClusterRole
+#metadata:
+#  name: full-access-cr
+#rules:
+#  - apiGroups: [""]
+#    resources: ["events"] verbs: ["get","list","create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: full-access-rb
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ printf "%s-%s" .Release.Name "centrallogtest" | trunc 63 }}
+  annotations:
+    "helm.sh/hook": test-success
+spec:
+        #  serviceAccountName: {{ .Values.name }}-{{ .Release.Namespace }}
+  initContainers:
+    - name: test-framework
+      image: dduportal/bats:0.4.0
+      command:
+      - "bash"
+      - "-c"
+      - |
+        set -ex
+        # copy bats to tools dir
+        cp -R /usr/local/libexec/ /tools/bats/
+      volumeMounts:
+      - mountPath: /tools
+        name: tools
+  containers:
+    - name: {{ .Release.Name }}-test
+      image: {{ .Values.central.test.image }}
+      command: ["/tools/bats/bats", "-t", "/tests/run.sh"]
+      env:
+      - name: TIMENOW
+        value: {{ trim (printf "%s" .Release.Time) | quote }}
+      volumeMounts:
+      - name: tests
+        mountPath: /tests
+      - name: tools
+        mountPath: /tools
+      - name: testfiles
+        mountPath: /testfiles
+  volumes:
+  - name: tests
+    configMap:
+      name: {{ printf "%s-%s" .Release.Name "centrallogtest" | trunc 63 }}
+  - name: tools
+    emptyDir: {}
+  - name: testfiles
+    emptyDir: {}
+  restartPolicy: Never

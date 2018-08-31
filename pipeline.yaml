@@ -2,8 +2,12 @@ type: chart
 deployments:
   - chart: logging-central
     release: logging-central
+    timeout: 1200
+    retries: 2
     test: 
       values:
+        - key: central.ci_testing
+          value: true
         - key: elasticsearch-chart.master_replicas
           value: 3
         - key: elasticsearch-chart.master_memory_limits
