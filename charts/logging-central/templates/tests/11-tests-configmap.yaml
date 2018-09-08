@@ -44,8 +44,8 @@ data:
     BATS_TMPDIR="/testfiles"
     TEST_TMPL="$TEST_TMPL_DIR/event-test.tpl"
     TEST_JSON="$TEST_TEMP_DIR/tests.json"
+    TEST_DATE="$TEST_TEMP_DIR/date.txt"
     TMP_RESP="$BATS_TMPDIR/resp.out"
-    TIMESTAMP="$(date +%FT%H:%M:%SZ)"
     ES_URL="http://elasticsearch.{{ .Release.Namespace }}:9200/_cat/health"
     ES_SEARCH_URL="http://elasticsearch.{{ .Release.Namespace }}:9200/logstash-*/_search?size=10"
     ES_COUNT_URL="http://elasticsearch.{{ .Release.Namespace }}:9200/logstash-*/_count"
@@ -89,6 +89,11 @@ data:
 
     # test 1
     @test "Create VALID test JSON from template" {
+      # NOTE: env vars get re-eval'd on every @test step...so theis value changes
+      # hack to save the exact time until the next steps...
+      TIMESTAMP="$(date +%FT%H:%M:%SZ)"
+      echo "$TIMESTAMP" > $TEST_DATE
+
       echo "" >&3
       echo "=====================================" >&3
       echo "\$TIMENOW is: $TIMENOW" >&3
@@ -168,7 +173,7 @@ data:
     #       -d '{ "query" : { "match_all" : {}}}' \
     #
     @test "Test VERIFY event to ElasticSearch was RECVd" {
-
+      TIMESTAMP="$(cat $TEST_DATE)"
       # retry  100*3=300sec  5 min
       ATTEMPTS=1
       REC_ROUNT=0
