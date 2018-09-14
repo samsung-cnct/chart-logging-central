@@ -8,6 +8,8 @@ deployments:
       values:
         - key: central.ci_testing
           value: true
+        - key: elasticsearch-chart.services.es.public
+          value: false
         - key: elasticsearch-chart.master_replicas
           value: 3
         - key: elasticsearch-chart.master_memory_limits
