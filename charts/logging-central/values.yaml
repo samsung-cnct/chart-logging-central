@@ -37,7 +37,7 @@ external-dns:
   # replace with your domain.
   #
   # this can be set on the commmand line as; 
-  # external-dns.domainFilters[0]="external-dns.alpha.kubernetes.io/hostname"
+  # external-dns.domainFilters[0]="<mydomain>.cluster.cnct.io"
   #
   domainFilters: [ "<mydomain>.cluster.cnct.io" ]
   rbac:
@@ -50,9 +50,9 @@ elasticsearch-chart:
   data_memory_limits: 16Gi
   data_memory_requests: 16Gi
   data_Xms_Xmx: 8g
-  # master_memory_limits: 2Gi
-  # master_memory_requests: 2Gi
-  # master_Xms_Xmx: 1g
+  #master_memory_limits: 2Gi
+  #master_memory_requests: 2Gi
+  #master_Xms_Xmx: 1g
 
   security:
     password: "changeme"
@@ -63,7 +63,7 @@ elasticsearch-chart:
       # elasticsearch-chart.services.es.annotations[0].key="external-dns.alpha.kubernetes.io/hostname",elasticsearch-chart.services.es.annotations[0].value=esold.mikeln.cluster.cnct.io
       annotations:
       - key: "external-dns.alpha.kubernetes.io/hostname"
-        value: "es.<newdomain>.cluster.cnct.io" 
+        value: "es.<mydomain>.cluster.cnct.io" 
 
 kibana:
   name: kibana
@@ -80,7 +80,7 @@ curator:
   schedule: "30 3 * * *"
   action: delete_indices
   security:
-    password: "changme"
+    password: "changeme"
   
   logstashFilters:
     direction: older
