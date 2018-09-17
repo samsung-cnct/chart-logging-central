@@ -1,4 +1,9 @@
 # Default values.
+#
+# NOTE: This file does not attempt to represent all possible changeable values in the subscharts.
+# It only attempts to contain values that might be changed more often.  
+# If a values is not listed here, the subchart's values are used.
+#
 
 name: central_logging
 
