@@ -1,4 +1,9 @@
 # Default values.
+#
+# NOTE: This file does not attempt to represent all possible changeable values in the subscharts.
+# It only attempts to contain values that might be changed more often.  
+# If a values is not listed here, the subchart's values are used.
+#
 
 name: central_logging
 
@@ -16,12 +21,36 @@ elasticsearch-chart:
   data_memory_limits: 16Gi
   data_memory_requests: 16Gi
   data_Xms_Xmx: 8g
+  # master_memory_limits: 2Gi
+  # master_memory_requests: 2Gi
+  # master_Xms_Xmx: 1g
+
+  security:
+    password: "changeme"
+  services:
+    es:
+      public: true
+      # this can be set on the commmand line as; 
+      # elasticsearch-chart.services.es.annotations[0].key="external-dns.alpha.kubernetes.io/hostname",elasticsearch-chart.services.es.annotations[0].value=esold.mikeln.cluster.cnct.io
+      annotations:
+      - key: "external-dns.alpha.kubernetes.io/hostname"
+        value: "es.<newdomain>.cluster.cnct.io" 
+
+  external-dns:
+   # can be set on the commandline as:
+   # domainFilters[0]="mikeln.cluster.cnct.io"
+   # 
+   #  has to match the above without es
+   domainFilters: [ "<newdomain>.cluster.cnct.io" ]
+   aws:
+     secretKey: COMMAND_LINE
+     accessKey: COMMAND_LINE
 
 kibana:
   name: kibana
   port: 5601
-
-kibana:
+  security:
+    password: "changeme"
   cpu_limit: 100m
   cpu_requests: 100m
   mem_limit: 512Mi
@@ -31,26 +60,18 @@ curator:
   name: curator
   schedule: "30 3 * * *"
   action: delete_indices
-  description:
-    Delete indices older than 14 days and prefixed with logstash-.
-    Ignore the error if the filter does not result in an actionable
-    list of indices (ignore_empty_list) and exit cleanly.
+  security:
+    password: "changme"
   
-  filters:
-  - filtertype: pattern
-    kind: prefix
-    value: "logstash-"
-    exclude: False
-  - filtertype: age
-    source: name
-    timestring: '%Y.%m.%d'
+  logstashFilters:
     direction: older
     unit: days
     unit_count: 14
-    field: null
-    stats_result: null
-    epoch: null
-    exclude: False
+  
+  logsystemdFilters:
+    direction: older
+    unit: days
+    unit_count: 14
   
   logging:
     loglevel: INFO
