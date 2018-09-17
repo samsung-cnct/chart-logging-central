@@ -7,13 +7,15 @@ central logging solution for Kubernetes clusters. These replace the deprecated `
 
 The logging-client will collect Kubernetes logs and events with fluentbit, enrich them with Kubernetes metadata and send them to this system. There they will be saved in an elasticsearch data store and made available for visualization and querying with kibana.  Curator will delete old indices after two weeks. 
 
-This uses external-dns to maintain the ELB - FQDN link for the external entry points.  e.g. elasticsearch: es.whatever.cluster.cnct.io.
 
-## AWS Route53 Setup
-external-dns in a very constrained setup is used to create/maintain the ELB to FQDN connection.
-Create a logging-dns AWS user if one is not present, with only programatic access (no console)
-Create the following route53 only IAM as described here: https://github.com/kubernetes-incubator/external-dns/blob/master/docs/tutorials/aws.md#iam-permissions and assign it to the user as the only policy for that user.
-{
+## AWS Setup for Route53
+This uses external-dns in a very constrained setup is used to create/maintain the ELB to FQDN connection.
+
+Create a logging-dns AWS user if one is not present, with only programatic access (no console).
+
+Create the following route53 only IAM as described here:[ https://github.com/kubernetes-incubator/external-dns/blob/master/docs/tutorials/aws.md#iam-permissions]() and assign it to the user as the only policy for that user.
+
+```{
  "Version": "2012-10-17",
  "Statement": [
    {
@@ -37,12 +39,19 @@ Create the following route53 only IAM as described here: https://github.com/kube
    }
  ]
 }
+```
+
 Note the Access and Secret Keys for this user, as they are needed by the program to manipulate route53.  They will be passed in to the chart installation.
-Create your domain entry in route53.  e.g. newdomain.cluster.cnct.io.  
-Add an NS record to the lower domain for your new domain to allow naming resolution.  e.g. in cluster.cnct.io add a new NS record and copy the values from the  newdomain.cluster.cnct.io NS record to that.
-Modify values.yaml or set the values on the helm install:
+
+Create your domain entry in route53.  e.g. `newdomain.cluster.cnct.io`.  
+Add an NS record to the lower domain for your new domain to allow naming resolution.  e.g. in `cluster.cnct.io` add a new NS record and copy the values from the  `newdomain.cluster.cnct.io` NS record to that.
+Modify `values.yaml` or set the values on the helm install:
+
+```
 --set external-dns.domainFilters[0]="newdomain.cluster.cnct.io"
---set elasticsearch-chart.services.es.annotations[0].key="external-dns.alpha.kubernetes.io/hostname",elasticsearch-chart.services.es.annotations[0].value=es.newdoamin.cluster.cnct.io
+--set elasticsearch-chart.services.es.annotations[0].key="external-dns.alpha.kubernetes.io/hostname"
+--set elasticsearch-chart.services.es.annotations[0].value=es.newdoamin.cluster.cnct.io
+```
 
 ## How to install on running Kubernetes cluster with [helm](https://github.com/kubernetes/helm/blob/master/docs/install.md)
 Ensure that you have helm and [tiller](https://docs.helm.sh/using_helm/) installed. 
@@ -51,7 +60,6 @@ Make sure your cluster has at least 6 worker nodes
 ``` 
 helm repo add cnct https://charts.migrations.cnct.io
 helm repo add stable https://kubernetes-charts.storage.googleapis.com/
-helm repo add incubator https://kubernetes-charts-incubator.storage.googleapis.com/
 helm repo update
 helm depdendy update
 helm install cnct/logging-central --set external-dns.aws.secretKey="$AWS_SECRET_ACCESS_KEY",external-dns.aws.accessKey="$AWS_ACCESS_KEY_ID"
