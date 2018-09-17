@@ -9,10 +9,39 @@ name: central_logging
 
 central:
   ci_testing: false
+  publc: true
   test:
     image: quay.io/samsung_cnct/e2etester:prod
     account: elastic
     password: changeme
+
+#
+# Only used if central.public: true  above
+#
+external-dns:
+  aws:
+    # These are the credentials for an aws user than can manipulate route53
+    # They must be supplied on the command line e.g.:
+    # --set external-dns.aws.secretKey="value1",external-dns.aws.accessKey="value2".
+    #
+    # If these are invalid, the public DN for elasticsearch will not be created
+    secretKey: SET_ON_COMMAND_LINE
+    accessKey: SET_ON_COMMAND_LINE
+    roleArn: ""
+    region: "us-west-2"
+    # Filter for zones of this type (optional, options: public, private)
+    zoneType: ""
+  #
+  # The following is the base FQDN for the services we need.
+  # The baseDomain has to be set up by hand in route53 before installing this chart.
+  # replace with your domain.
+  #
+  # this can be set on the commmand line as; 
+  # external-dns.domainFilters[0]="external-dns.alpha.kubernetes.io/hostname"
+  #
+  domainFilters: [ "<mydomain>.cluster.cnct.io" ]
+  rbac:
+    create: true
 
 elasticsearch-chart:
   name: elasticsearch
@@ -35,16 +64,6 @@ elasticsearch-chart:
       annotations:
       - key: "external-dns.alpha.kubernetes.io/hostname"
         value: "es.<newdomain>.cluster.cnct.io" 
-
-  external-dns:
-   # can be set on the commandline as:
-   # domainFilters[0]="mikeln.cluster.cnct.io"
-   # 
-   #  has to match the above without es
-   domainFilters: [ "<newdomain>.cluster.cnct.io" ]
-   aws:
-     secretKey: COMMAND_LINE
-     accessKey: COMMAND_LINE
 
 kibana:
   name: kibana
