@@ -13,7 +13,7 @@ This uses external-dns in a very constrained setup is used to create/maintain th
 
 Create a logging-dns AWS user if one is not present, with only programatic access (no console).
 
-Create the following route53 only IAM as described here:[ https://github.com/kubernetes-incubator/external-dns/blob/master/docs/tutorials/aws.md#iam-permissions]() and assign it to the user as the only policy for that user.
+Create the following route53 only IAM as described [here](https://github.com/kubernetes-incubator/external-dns/blob/master/docs/tutorials/aws.md#iam-permissions) and assign it to the user as the only policy for that user.
 
 ```{
  "Version": "2012-10-17",
