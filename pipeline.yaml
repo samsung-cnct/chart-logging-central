@@ -8,7 +8,7 @@ deployments:
       values:
         - key: central.ci_testing
           value: true
-        - key: elasticsearch-chart.services.es.public
+        - key: central.public
           value: false
         - key: elasticsearch-chart.master_replicas
           value: 3

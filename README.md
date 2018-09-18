@@ -7,14 +7,62 @@ central logging solution for Kubernetes clusters. These replace the deprecated `
 
 The logging-client will collect Kubernetes logs and events with fluentbit, enrich them with Kubernetes metadata and send them to this system. There they will be saved in an elasticsearch data store and made available for visualization and querying with kibana.  Curator will delete old indices after two weeks. 
 
+
+## AWS Setup for Route53
+This uses external-dns in a very constrained setup is used to create/maintain the ELB to FQDN connection.
+
+Create a logging-dns AWS user if one is not present, with only programatic access (no console).
+
+Create the following route53 only IAM as described here:[ https://github.com/kubernetes-incubator/external-dns/blob/master/docs/tutorials/aws.md#iam-permissions]() and assign it to the user as the only policy for that user.
+
+```{
+ "Version": "2012-10-17",
+ "Statement": [
+   {
+     "Effect": "Allow",
+     "Action": [
+       "route53:ChangeResourceRecordSets"
+     ],
+     "Resource": [
+       "arn:aws:route53:::hostedzone/*"
+     ]
+   },
+   {
+     "Effect": "Allow",
+     "Action": [
+       "route53:ListHostedZones",
+       "route53:ListResourceRecordSets"
+     ],
+     "Resource": [
+       "*"
+     ]
+   }
+ ]
+}
+```
+
+Note the Access and Secret Keys for this user, as they are needed by the program to manipulate route53.  They will be passed in to the chart installation.
+
+Create your domain entry in route53.  e.g. `newdomain.cluster.cnct.io`.  
+Add an NS record to the lower domain for your new domain to allow naming resolution.  e.g. in `cluster.cnct.io` add a new NS record and copy the values from the  `newdomain.cluster.cnct.io` NS record to that.
+Modify `values.yaml` or set the values on the helm install:
+
+```
+--set external-dns.domainFilters[0]="newdomain.cluster.cnct.io"
+--set elasticsearch-chart.services.es.annotations[0].key="external-dns.alpha.kubernetes.io/hostname"
+--set elasticsearch-chart.services.es.annotations[0].value=es.newdoamin.cluster.cnct.io
+```
+
 ## How to install on running Kubernetes cluster with [helm](https://github.com/kubernetes/helm/blob/master/docs/install.md)
 Ensure that you have helm and [tiller](https://docs.helm.sh/using_helm/) installed. 
 Make sure your cluster has at least 6 worker nodes
 ### From our chart repository
 ``` 
 helm repo add cnct https://charts.migrations.cnct.io
+helm repo add stable https://kubernetes-charts.storage.googleapis.com/
 helm repo update
-helm install cnct/logging-central
+helm depdendy update
+helm install cnct/logging-central --set external-dns.aws.secretKey="$AWS_SECRET_ACCESS_KEY",external-dns.aws.accessKey="$AWS_ACCESS_KEY_ID"
 ```
 
 This system is currently using [elasticsearch xpack](https://www.elastic.co/guide/en/x-pack/current/elasticsearch-security.html) for security. To view your logs, run ``` kubectl get svc kibana-logging -o wide ``` and navigate to `<EXTERNAL-IP>:5601`. You will need to log in using the default username `elastic` and password of `changeme`.
