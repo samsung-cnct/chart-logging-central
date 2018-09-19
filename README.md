@@ -77,9 +77,14 @@ This system is currently using [elasticsearch xpack](https://www.elastic.co/guid
 - [Docs](https://www.elastic.co/guide/en/elasticsearch/client/curator/5.5/index.html)
 - [Chart](https://github.com/samsung-cnct/chart-curator)
 
-#### Data visualation: [Kibana](https://www.elastic.co/products/kibana)
+#### Data visualization: [Kibana](https://www.elastic.co/products/kibana)
 - [Docs](https://www.elastic.co/guide/en/kibana/6.4/introduction.html)
 - [Chart](https://github.com/samsung-cnct/chart-kibana)
+
+#### External-dns to make kibana discoverable via route53
+- [Docs](https://github.com/kubernetes-incubator/external-dns/blob/master/docs/tutorials/aws.md)
+- [Chart](https://github.com/helm/charts/tree/master/stable/external-dns)
+
 
 ## Contributing
 
