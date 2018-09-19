@@ -70,10 +70,10 @@ kibana:
   port: 5601
   security:
     password: "changeme"
-  cpu_limit: 100m
-  cpu_requests: 100m
-  mem_limit: 512Mi
-  mem_requests: 512Mi
+  cpu_limit: 200m
+  cpu_requests: 200m
+  mem_limit: 4Gi
+  mem_requests: 4Gi
 
 curator:
   name: curator
