@@ -1,7 +1,7 @@
 ---
 dependencies:
 - name: elasticsearch-chart
-  version: ">=0.1.9-prod,<0.1.10-prod"
+  version: ">=0.1.10-prod,<0.1.11-prod"
   repository: https://charts.migrations.cnct.io
 - name: curator
   version: ">=0.0.8-prod,<0.0.9-prod"
