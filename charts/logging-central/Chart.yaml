@@ -1,5 +1,5 @@
 name: logging-central
-version: 0.1.14
+version: 0.1.15
 description: Logging chart for central elasticsearch (+ curator) -> kibana
 keywords:
 - elasticsearch
