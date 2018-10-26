@@ -1,19 +1,19 @@
 ---
 dependencies:
 - name: elasticsearch-chart
-  version: ">=0.1.11-prod,<0.1.12-prod"
+  version: ">=0.1.12-prod,<0.1.13-prod"
   repository: https://charts.migrations.cnct.io
 - name: curator
   version: ">=0.0.8-prod,<0.0.9-prod"
   repository: https://charts.migrations.cnct.io
 - name: kibana
-  version: ">=0.1.5-prod,<0.1.6-prod"
+  version: ">=0.1.6-prod,<0.1.7-prod"
   repository: https://charts.migrations.cnct.io
 - name: external-dns
   version: "0.7.5"
   repository: https://kubernetes-charts.storage.googleapis.com/
   condition: central.public
 - name: logging-client
-  version: ">=0.0.12-prod,<0.0.13-prod"
+  version: ">=0.0.13-prod,<0.0.14-prod"
   repository: https://charts.migrations.cnct.io
   condition: central.ci_testing
