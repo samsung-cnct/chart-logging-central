@@ -58,7 +58,7 @@ Ensure that you have helm and [tiller](https://docs.helm.sh/using_helm/) install
 Make sure your cluster has at least 6 worker nodes
 ### From our chart repository
 ``` 
-helm repo add cnct https://charts.migrations.cnct.io
+helm repo add cnct https://charts.cnct.io
 helm repo add stable https://kubernetes-charts.storage.googleapis.com/
 helm repo update
 helm install cnct/logging-central --set external-dns.aws.secretKey="$AWS_SECRET_ACCESS_KEY",external-dns.aws.accessKey="$AWS_ACCESS_KEY_ID"
@@ -93,7 +93,7 @@ This system is currently using [elasticsearch xpack](https://www.elastic.co/guid
 3. Go into that new local copy: `cd chart-logging-central`
 3. Set the upstream remote to be the source repo: `git remote add upstream git@github.com:samsung-cnct/chart-logging-central.git`
 4. Go into the chart subdirectory: `cd charts/logging-central/`
-5. Make sure your local helm repos are up to date: `helm repo add cnct https://charts.migrations.cnct.io; 
+5. Make sure your local helm repos are up to date: `helm repo add cnct https://charts.cnct.io; 
 helm repo add stable https://kubernetes-charts.storage.googleapis.com/; 
 helm repo update`
 5. Pull in all the dependent helm charts: `helm dependency update`
