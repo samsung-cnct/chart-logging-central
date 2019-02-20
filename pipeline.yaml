@@ -46,6 +46,6 @@ deployments:
           value: 512Mi
 helmRepos:
    - name: cnct-migrations
-     url: http://charts.migrations.cnct.io
+     url: http://charts.cnct.io
 prod: 
   doDeploy: none
